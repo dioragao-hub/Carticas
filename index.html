@@ -1,68 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Magic Collection</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic Collection</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Login overlay -->
+<!-- Pantalla de login -->
 <div id="loginOverlay">
-  <div id="loginBox">
-    <h2>Acceso a tu colección</h2>
-    <input type="password" id="loginPassword" placeholder="Introduce la contraseña">
-    <button id="loginBtn">Entrar</button>
-    <p id="loginError" style="color:red; display:none;">Contraseña incorrecta</p>
-  </div>
+  <h2>Introduce contraseña</h2>
+  <input type="password" id="loginPassword" placeholder="Contraseña">
+  <button id="loginBtn">Entrar</button>
+  <p id="loginError" style="display:none;color:red;">Contraseña incorrecta</p>
 </div>
 
-<!-- Main content -->
-<div id="mainContent" style="display:none;">
-  <h1 id="tituloColeccion">Mountain – Magic the Gathering</h1>
+<!-- Contenido principal -->
+<div id="mainContent" style="display:none">
 
-  <!-- Barra superior sticky -->
-  <div id="barraSuperior">
-    <div id="contador">Cargando...</div>
-    <div class="control-group">
+  <header>
+    <h1>Mountain – Magic the Gathering</h1>
+    <div class="top-controls">
       <select id="selectorTierra">
         <option value="Mountain">Mountain</option>
         <option value="Island">Island</option>
-        <option value="Forest">Forest</option>
         <option value="Plains">Plains</option>
         <option value="Swamp">Swamp</option>
+        <option value="Forest">Forest</option>
       </select>
-      <button id="ordenarBtn">Orden: Ascendente</button>
-      <button id="candadoBtn" title="Marcado desbloqueado">🔓</button>
+
+      <button id="btnTierra" class="active">Tierras</button>
+      <button id="btnToken">Tokens</button>
+
       <label><input type="checkbox" id="filtroTengo"> Tengo</label>
       <label><input type="checkbox" id="filtroNoTengo"> No tengo</label>
       <label><input type="checkbox" id="filtroFoil"> Foil</label>
       <label><input type="checkbox" id="filtroNoFoil"> No Foil</label>
-      <button id="btnTierra" class="active">Tierras</button>
-      <button id="btnToken">Tokens</button>
+
+      <button id="ordenarBtn">Orden: Ascendente</button>
+      <button id="candadoBtn" title="Marcado desbloqueado">🔓</button>
+      <button id="btnModoBorrar">🗑️ Borrar carta</button>
+      <button id="exportBtn">💾 Exportar colección</button>
+      <button id="importBtn">📂 Importar colección</button>
     </div>
-  </div>
 
-  <!-- Formulario añadir carta y borrar -->
-  <div id="agregarCarta">
-    <h3>Añadir carta</h3>
-    <input id="nombreCarta" placeholder="Nombre de la carta" required>
-    <input id="setCarta" placeholder="Colección" required>
-    <input id="fechaCarta" type="date" placeholder="Fecha de aparición" required>
-    <input id="urlImagen" placeholder="URL de la imagen (dejar vacío si usar imagen local)">
-    <input id="fileImagen" type="file" accept="image/*">
-    <label>Foil <input type="checkbox" id="esFoil"></label>
+    <div id="contador"></div>
+  </header>
+
+  <div id="spinner">Cargando cartas...</div>
+  <div id="cards"></div>
+
+  <!-- Formulario para agregar cartas -->
+  <form id="formAgregarCarta">
+    <input type="text" id="nombreCarta" placeholder="Nombre carta">
+    <input type="text" id="setCarta" placeholder="Set">
+    <input type="date" id="fechaCarta">
+    <input type="url" id="urlImagen" placeholder="URL imagen">
+    <input type="file" id="fileImagen">
+    <label><input type="checkbox" id="esFoil"> Foil</label>
     <button id="btnAgregarCarta">Añadir carta</button>
-    <button id="btnModoBorrar">🗑️ Borrar carta</button>
-  </div>
+  </form>
 
-  <!-- Contenedor cartas -->
-  <div id="cards">
-    <div id="spinner" class="spinner" style="display:none;"></div>
-  </div>
+  <!-- Botón scroll arriba -->
+  <button id="scrollTopBtn">⬆️</button>
 
-  <!-- Botón subir arriba -->
-  <button id="scrollTopBtn">⬆</button>
 </div>
 
 <script src="script.js"></script>

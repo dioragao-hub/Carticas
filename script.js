@@ -30,13 +30,51 @@ document.addEventListener("DOMContentLoaded", ()=>{
     const spinner=document.getElementById("spinner");
     const scrollBtn=document.getElementById("scrollTopBtn");
     const btnModoBorrar=document.getElementById("btnModoBorrar");
+    const exportBtn=document.getElementById("exportBtn");
+    const importBtn=document.getElementById("importBtn");
 
     let owned=JSON.parse(localStorage.getItem("ownedCards")||"{}");
     let todasCartas=[], ordenAscendente=true, tierraSeleccionada=selectorTierra.value;
     let pestañaActiva="tierra", marcadoBloqueado=false, modoBorrar=false;
+    let cartasMostradas=0, LOTE=30;
 
-    let cartasMostradas=0; // Para control de lotes
-    const LOTE=30; // Mostrar 30 cartas a la vez
+    // --- Sincronización GitHub ---
+    async function cargarColeccionGitHub(){
+      try {
+        const res=await fetch("https://raw.githubusercontent.com/dioragao/Carticas/main/miColeccion.json");
+        const data=await res.json();
+        owned=data;
+        localStorage.setItem("ownedCards", JSON.stringify(owned));
+      } catch(e){ console.log("No se pudo cargar colección desde GitHub"); }
+    }
+
+    function exportarColeccion(){
+      const dataStr=JSON.stringify(owned,null,2);
+      const blob=new Blob([dataStr],{type:"application/json"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;
+      a.download="miColeccion.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importarColeccion(){
+      const input=document.createElement("input");
+      input.type="file";
+      input.accept=".json";
+      input.addEventListener("change",(e)=>{
+        const file=e.target.files[0];
+        const reader=new FileReader();
+        reader.onload=()=>{
+          owned=JSON.parse(reader.result);
+          localStorage.setItem("ownedCards",JSON.stringify(owned));
+          mostrarCartasFiltradas(cartasMostradas);
+        };
+        reader.readAsText(file);
+      });
+      input.click();
+    }
 
     function actualizarContador(){
       const totalTodasCartas=todasCartas.length;
@@ -56,16 +94,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
     }
 
     function mostrarCartasFiltradas(limite=LOTE){
-      const total= todasCartas.length;
       container.innerHTML="";
       let cartasParaMostrar=[...todasCartas];
-
       cartasParaMostrar.sort((a,b)=>ordenAscendente?(new Date(a.released_at)-new Date(b.released_at)):(new Date(b.released_at)-new Date(a.released_at)));
-
       cartasMostradas=0;
 
       for(let card of cartasParaMostrar){
-        if(cartasMostradas>=limite) break; // Solo mostrar hasta el límite
+        if(cartasMostradas>=limite) break;
         if(!card.image_uris) continue;
         const id=card.id, isOwned=owned[id];
 
@@ -86,16 +121,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
           <label><input type="checkbox" ${isOwned?"checked":""}> La tengo</label>
         `;
 
-        // Checkbox "La tengo"
         const checkbox=div.querySelector("input");
         checkbox.addEventListener("change", ()=>{
           if(marcadoBloqueado){ checkbox.checked=!checkbox.checked; return; }
           owned[id]=checkbox.checked;
           localStorage.setItem("ownedCards",JSON.stringify(owned));
-          mostrarCartasFiltradas(cartasMostradas); // Mantener la cantidad de cartas mostradas
+          mostrarCartasFiltradas(cartasMostradas);
         });
 
-        // Modo borrar
         if(modoBorrar){
           div.addEventListener("click", ()=>{
             if(confirm(`¿Seguro que quieres borrar "${card.name}"?`)){
@@ -116,18 +149,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
       actualizarContador();
     }
 
-    // Detectar scroll para cargar más cartas
-    window.addEventListener("scroll", ()=>{
-  if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100){
-    mostrarCartasFiltradas(cartasMostradas + LOTE);
-  }
-});
-
-
     async function cargarNuevaTierra(){
       spinner.style.display="block"; container.innerHTML="";
-      todasCartas=[];
-      cartasMostradas=0;
+      todasCartas=[]; cartasMostradas=0;
       const url=`https://api.scryfall.com/cards/search?q=name:${tierraSeleccionada}+type:basic&unique=prints&order=released`;
       await cargarCartas(url);
       mostrarCartasFiltradas();
@@ -136,8 +160,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     async function cargarTokens(){
       spinner.style.display="block"; container.innerHTML="";
-      todasCartas=[];
-      cartasMostradas=0;
+      todasCartas=[]; cartasMostradas=0;
       const url=`https://api.scryfall.com/cards/search?q=type:token&unique=prints&order=released`;
       await cargarCartas(url);
       mostrarCartasFiltradas();
@@ -149,10 +172,27 @@ document.addEventListener("DOMContentLoaded", ()=>{
     selectorTierra.addEventListener("change", ()=>{ tierraSeleccionada=selectorTierra.value; document.querySelector("h1").textContent=`${tierraSeleccionada} – Magic the Gathering`; cargarNuevaTierra(); });
     btnTierra.addEventListener("click", ()=>{ pestañaActiva="tierra"; btnTierra.classList.add("active"); btnToken.classList.remove("active"); cargarNuevaTierra(); });
     btnToken.addEventListener("click", ()=>{ pestañaActiva="token"; btnToken.classList.add("active"); btnTierra.classList.remove("active"); cargarTokens(); });
-    candadoBtn.addEventListener("click", ()=>{ marcadoBloqueado=!marcadoBloqueado; candadoBtn.textContent=marcadoBloqueado?"🔒":"🔓"; candadoBtn.title=marcadoBloqueado?"Marcado bloqueado":"Marcado desbloqueado"; });
+    candadoBtn.addEventListener("click", ()=>{ marcadoBloqueado=!marcadoBloqueado; candadoBtn.textContent=marcadoBloqueado?"🔒":"🔓"; });
 
-    window.addEventListener("scroll", ()=>{ scrollBtn.style.display=(window.scrollY>200)?"block":"none"; });
+    window.addEventListener("scroll", ()=>{
+      if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100){
+        mostrarCartasFiltradas(cartasMostradas + LOTE);
+      }
+      scrollBtn.style.display=(window.scrollY>200)?"block":"none";
+    });
     scrollBtn.addEventListener("click", ()=>{ window.scrollTo({top:0,behavior:'smooth'}); });
+
+    btnModoBorrar.addEventListener("click", ()=>{
+      modoBorrar=!modoBorrar;
+      btnModoBorrar.textContent=modoBorrar?"Cancelar borrar":"🗑️ Borrar carta";
+      mostrarCartasFiltradas(cartasMostradas);
+    });
+
+    exportBtn.addEventListener("click", exportarColeccion);
+    importBtn.addEventListener("click", importarColeccion);
+
+    cargarColeccionGitHub();
+    cargarNuevaTierra();
 
     // Formulario añadir carta
     document.getElementById("btnAgregarCarta").addEventListener("click", async (e)=>{
@@ -187,15 +227,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
       document.getElementById("fileImagen").value="";
       document.getElementById("esFoil").checked=false;
     });
-
-    // Botón modo borrar
-    btnModoBorrar.addEventListener("click", ()=>{
-      modoBorrar = !modoBorrar;
-      btnModoBorrar.textContent = modoBorrar ? "Cancelar borrar" : "🗑️ Borrar carta";
-      mostrarCartasFiltradas(cartasMostradas);
-    });
-
-    // Cargar inicialmente
-    cargarNuevaTierra();
   }
 });

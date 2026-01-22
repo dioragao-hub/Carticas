@@ -2,8 +2,7 @@
 // CONSTANTES GLOBALES
 // ==============================
 const GITHUB_JSON_URL =
-  "https://raw.githubusercontent.com/dioragao/Carticas/main/miColeccion.json?ts=" +
-  Date.now();
+  "https://dioragao.github.io/Carticas/miColeccion.json?ts=" + Date.now();
 
 // ==============================
 // INICIO DE LA APLICACIÓN

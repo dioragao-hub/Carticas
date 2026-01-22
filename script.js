@@ -35,6 +35,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
     let todasCartas=[], ordenAscendente=true, tierraSeleccionada=selectorTierra.value;
     let pestañaActiva="tierra", marcadoBloqueado=false, modoBorrar=false;
 
+    let cartasMostradas=0; // Para control de lotes
+    const LOTE=30; // Mostrar 30 cartas a la vez
+
     function actualizarContador(){
       const totalTodasCartas=todasCartas.length;
       let tengo=0;
@@ -52,17 +55,24 @@ document.addEventListener("DOMContentLoaded", ()=>{
       if(data.has_more) await cargarCartas(data.next_page);
     }
 
-    function mostrarCartasFiltradas(){
+    function mostrarCartasFiltradas(limite=LOTE){
+      const total= todasCartas.length;
       container.innerHTML="";
       let cartasParaMostrar=[...todasCartas];
+
       cartasParaMostrar.sort((a,b)=>ordenAscendente?(new Date(a.released_at)-new Date(b.released_at)):(new Date(b.released_at)-new Date(a.released_at)));
-      cartasParaMostrar.forEach(card=>{
-        if(!card.image_uris) return;
+
+      cartasMostradas=0;
+
+      for(let card of cartasParaMostrar){
+        if(cartasMostradas>=limite) break; // Solo mostrar hasta el límite
+        if(!card.image_uris) continue;
         const id=card.id, isOwned=owned[id];
-        if(filtroTengo.checked && !isOwned) return;
-        if(filtroNoTengo.checked && isOwned) return;
-        if(filtroFoil.checked && !card.foil) return;
-        if(filtroNoFoil.checked && card.foil) return;
+
+        if(filtroTengo.checked && !isOwned) continue;
+        if(filtroNoTengo.checked && isOwned) continue;
+        if(filtroFoil.checked && !card.foil) continue;
+        if(filtroNoFoil.checked && card.foil) continue;
 
         const div=document.createElement("div");
         div.className="card"+(isOwned?" owned":"");
@@ -82,10 +92,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
           if(marcadoBloqueado){ checkbox.checked=!checkbox.checked; return; }
           owned[id]=checkbox.checked;
           localStorage.setItem("ownedCards",JSON.stringify(owned));
-          mostrarCartasFiltradas();
+          mostrarCartasFiltradas(cartasMostradas); // Mantener la cantidad de cartas mostradas
         });
 
-        // Si está en modo borrar
+        // Modo borrar
         if(modoBorrar){
           div.addEventListener("click", ()=>{
             if(confirm(`¿Seguro que quieres borrar "${card.name}"?`)){
@@ -94,19 +104,29 @@ document.addEventListener("DOMContentLoaded", ()=>{
               localStorage.setItem("ownedCards",JSON.stringify(owned));
               modoBorrar=false;
               btnModoBorrar.textContent="🗑️ Borrar carta";
-              mostrarCartasFiltradas();
+              mostrarCartasFiltradas(cartasMostradas);
             }
           });
         }
 
         container.appendChild(div);
-      });
+        cartasMostradas++;
+      }
+
       actualizarContador();
     }
+
+    // Detectar scroll para cargar más cartas
+    container.addEventListener("scroll", ()=>{
+      if(container.scrollTop + container.clientHeight >= container.scrollHeight - 10){
+        mostrarCartasFiltradas(cartasMostradas + LOTE); // cargar siguiente lote
+      }
+    });
 
     async function cargarNuevaTierra(){
       spinner.style.display="block"; container.innerHTML="";
       todasCartas=[];
+      cartasMostradas=0;
       const url=`https://api.scryfall.com/cards/search?q=name:${tierraSeleccionada}+type:basic&unique=prints&order=released`;
       await cargarCartas(url);
       mostrarCartasFiltradas();
@@ -116,24 +136,24 @@ document.addEventListener("DOMContentLoaded", ()=>{
     async function cargarTokens(){
       spinner.style.display="block"; container.innerHTML="";
       todasCartas=[];
+      cartasMostradas=0;
       const url=`https://api.scryfall.com/cards/search?q=type:token&unique=prints&order=released`;
       await cargarCartas(url);
       mostrarCartasFiltradas();
       spinner.style.display="none";
     }
 
-    [filtroTengo,filtroNoTengo,filtroFoil,filtroNoFoil].forEach(f=>f.addEventListener("change",mostrarCartasFiltradas));
-    ordenarBtn.addEventListener("click", ()=>{ ordenAscendente=!ordenAscendente; ordenarBtn.textContent=ordenAscendente?"Orden: Ascendente":"Orden: Descendente"; mostrarCartasFiltradas(); });
+    [filtroTengo,filtroNoTengo,filtroFoil,filtroNoFoil].forEach(f=>f.addEventListener("change",()=>mostrarCartasFiltradas(cartasMostradas)));
+    ordenarBtn.addEventListener("click", ()=>{ ordenAscendente=!ordenAscendente; ordenarBtn.textContent=ordenAscendente?"Orden: Ascendente":"Orden: Descendente"; mostrarCartasFiltradas(cartasMostradas); });
     selectorTierra.addEventListener("change", ()=>{ tierraSeleccionada=selectorTierra.value; document.querySelector("h1").textContent=`${tierraSeleccionada} – Magic the Gathering`; cargarNuevaTierra(); });
     btnTierra.addEventListener("click", ()=>{ pestañaActiva="tierra"; btnTierra.classList.add("active"); btnToken.classList.remove("active"); cargarNuevaTierra(); });
     btnToken.addEventListener("click", ()=>{ pestañaActiva="token"; btnToken.classList.add("active"); btnTierra.classList.remove("active"); cargarTokens(); });
     candadoBtn.addEventListener("click", ()=>{ marcadoBloqueado=!marcadoBloqueado; candadoBtn.textContent=marcadoBloqueado?"🔒":"🔓"; candadoBtn.title=marcadoBloqueado?"Marcado bloqueado":"Marcado desbloqueado"; });
 
-    // Botón subir arriba
     window.addEventListener("scroll", ()=>{ scrollBtn.style.display=(window.scrollY>200)?"block":"none"; });
     scrollBtn.addEventListener("click", ()=>{ window.scrollTo({top:0,behavior:'smooth'}); });
 
-    // FORMULARIO AÑADIR CARTA
+    // Formulario añadir carta
     document.getElementById("btnAgregarCarta").addEventListener("click", async (e)=>{
       e.preventDefault();
       const nombre=document.getElementById("nombreCarta").value.trim();
@@ -157,7 +177,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
       const nuevaCarta={ id:"carta"+Date.now(), name:nombre, set_name:set, released_at:fecha, foil:foil, image_uris:{ normal:imageSrc } };
       todasCartas.push(nuevaCarta);
-      mostrarCartasFiltradas();
+      mostrarCartasFiltradas(cartasMostradas);
 
       document.getElementById("nombreCarta").value="";
       document.getElementById("setCarta").value="";
@@ -167,14 +187,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
       document.getElementById("esFoil").checked=false;
     });
 
-    // BOTÓN MODO BORRAR
+    // Botón modo borrar
     btnModoBorrar.addEventListener("click", ()=>{
       modoBorrar = !modoBorrar;
       btnModoBorrar.textContent = modoBorrar ? "Cancelar borrar" : "🗑️ Borrar carta";
-      mostrarCartasFiltradas();
+      mostrarCartasFiltradas(cartasMostradas);
     });
 
-    // Inicial
+    // Cargar inicialmente
     cargarNuevaTierra();
   }
 });

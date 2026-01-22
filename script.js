@@ -117,11 +117,12 @@ document.addEventListener("DOMContentLoaded", ()=>{
     }
 
     // Detectar scroll para cargar más cartas
-    container.addEventListener("scroll", ()=>{
-      if(container.scrollTop + container.clientHeight >= container.scrollHeight - 10){
-        mostrarCartasFiltradas(cartasMostradas + LOTE); // cargar siguiente lote
-      }
-    });
+    window.addEventListener("scroll", ()=>{
+  if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100){
+    mostrarCartasFiltradas(cartasMostradas + LOTE);
+  }
+});
+
 
     async function cargarNuevaTierra(){
       spinner.style.display="block"; container.innerHTML="";

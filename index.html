@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Magic Collection</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Login overlay -->
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h2>Acceso a tu colección</h2>
+    <input type="password" id="loginPassword" placeholder="Introduce la contraseña">
+    <button id="loginBtn">Entrar</button>
+    <p id="loginError" style="color:red; display:none;">Contraseña incorrecta</p>
+  </div>
+</div>
+
+<!-- Main content -->
+<div id="mainContent" style="display:none;">
+  <h1 id="tituloColeccion">Mountain – Magic the Gathering</h1>
+
+  <!-- Barra superior sticky -->
+  <div id="barraSuperior">
+    <div id="contador">Cargando...</div>
+    <div class="control-group">
+      <select id="selectorTierra">
+        <option value="Mountain">Mountain</option>
+        <option value="Island">Island</option>
+        <option value="Forest">Forest</option>
+        <option value="Plains">Plains</option>
+        <option value="Swamp">Swamp</option>
+      </select>
+      <button id="ordenarBtn">Orden: Ascendente</button>
+      <button id="candadoBtn" title="Marcado desbloqueado">🔓</button>
+      <label><input type="checkbox" id="filtroTengo"> Tengo</label>
+      <label><input type="checkbox" id="filtroNoTengo"> No tengo</label>
+      <label><input type="checkbox" id="filtroFoil"> Foil</label>
+      <label><input type="checkbox" id="filtroNoFoil"> No Foil</label>
+      <button id="btnTierra" class="active">Tierras</button>
+      <button id="btnToken">Tokens</button>
+    </div>
+  </div>
+
+  <!-- Formulario añadir carta y borrar -->
+  <div id="agregarCarta">
+    <h3>Añadir carta</h3>
+    <input id="nombreCarta" placeholder="Nombre de la carta" required>
+    <input id="setCarta" placeholder="Colección" required>
+    <input id="fechaCarta" type="date" placeholder="Fecha de aparición" required>
+    <input id="urlImagen" placeholder="URL de la imagen (dejar vacío si usar imagen local)">
+    <input id="fileImagen" type="file" accept="image/*">
+    <label>Foil <input type="checkbox" id="esFoil"></label>
+    <button id="btnAgregarCarta">Añadir carta</button>
+    <button id="btnModoBorrar">🗑️ Borrar carta</button>
+  </div>
+
+  <!-- Contenedor cartas -->
+  <div id="cards">
+    <div id="spinner" class="spinner" style="display:none;"></div>
+  </div>
+
+  <!-- Botón subir arriba -->
+  <button id="scrollTopBtn">⬆</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

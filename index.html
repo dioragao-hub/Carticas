@@ -21,36 +21,43 @@
 
   <header>
     <h1>Mountain – Magic the Gathering</h1>
+
+    <!-- Controles superiores -->
     <div class="top-controls">
-      <select id="selectorTierra">
-        <option value="Mountain">Mountain</option>
-        <option value="Island">Island</option>
-        <option value="Plains">Plains</option>
-        <option value="Swamp">Swamp</option>
-        <option value="Forest">Forest</option>
-      </select>
+      <div class="top-controls-left">
+        <select id="selectorTierra">
+          <option value="Mountain">Mountain</option>
+          <option value="Island">Island</option>
+          <option value="Plains">Plains</option>
+          <option value="Swamp">Swamp</option>
+          <option value="Forest">Forest</option>
+        </select>
 
-      <button id="btnTierra" class="active">Tierras</button>
-      <button id="btnToken">Tokens</button>
+        <button id="btnTierra" class="active">Tierras</button>
+        <button id="btnToken">Tokens</button>
 
-      <label><input type="checkbox" id="filtroTengo"> Tengo</label>
-      <label><input type="checkbox" id="filtroNoTengo"> No tengo</label>
-      <label><input type="checkbox" id="filtroFoil"> Foil</label>
-      <label><input type="checkbox" id="filtroNoFoil"> No Foil</label>
+        <label><input type="checkbox" id="filtroTengo"> Tengo</label>
+        <label><input type="checkbox" id="filtroNoTengo"> No tengo</label>
+        <label><input type="checkbox" id="filtroFoil"> Foil</label>
+        <label><input type="checkbox" id="filtroNoFoil"> No Foil</label>
 
-      <button id="ordenarBtn">Orden: Ascendente</button>
-      <button id="candadoBtn" title="Marcado desbloqueado">🔓</button>
-      <button id="btnModoBorrar">🗑️ Borrar carta</button>
-      <button id="exportBtn">💾 Exportar colección</button>
-      <button id="importBtn">📂 Importar colección</button>
+        <button id="ordenarBtn">Orden: Ascendente</button>
+        <button id="candadoBtn" title="Marcado desbloqueado">🔓</button>
+        <button id="btnModoBorrar">🗑️ Borrar carta</button>
+        <button id="exportBtn">💾 Exportar colección</button>
+        <button id="importBtn">📂 Importar colección</button>
+      </div>
+
+      <div class="top-controls-right">
+        <button id="syncGithubBtn">🔄 Sincronizar</button>
+      </div>
     </div>
-      
-<button id="syncGithubBtn">🔄 Sincronizar</button>
 
-
+    <!-- Contador de cartas -->
     <div id="contador"></div>
   </header>
 
+  <!-- Spinner y contenedor de cartas -->
   <div id="spinner">Cargando cartas...</div>
   <div id="cards"></div>
 

@@ -21,7 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Enter") loginBtn.click();
   });
 
-  function iniciarWeb() {
+  async function iniciarWeb() {
+
     const container = document.getElementById("cards");
     const contador = document.getElementById("contador");
     const filtroTengo = document.getElementById("filtroTengo");

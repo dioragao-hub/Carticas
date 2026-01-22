@@ -2,24 +2,30 @@ const GITHUB_JSON_URL =
   "https://dioragao.github.io/Carticas/miColeccion.json?ts=" + Date.now();
 
 document.addEventListener("DOMContentLoaded", () => {
+
   const loginOverlay = document.getElementById("loginOverlay");
   const mainContent = document.getElementById("mainContent");
   const loginBtn = document.getElementById("loginBtn");
   const loginPassword = document.getElementById("loginPassword");
   const loginError = document.getElementById("loginError");
+
   const PASSWORD = "mmmmm";
 
   loginBtn.addEventListener("click", () => {
     if (loginPassword.value === PASSWORD) {
       loginOverlay.style.display = "none";
       mainContent.style.display = "block";
-      iniciarWeb();
-    } else loginError.style.display = "block";
+      iniciarWeb();   // 👈 SOLO esto
+    } else {
+      loginError.style.display = "block";
+    }
   });
 
   loginPassword.addEventListener("keypress", e => {
     if (e.key === "Enter") loginBtn.click();
   });
+
+
 
   async function iniciarWeb() {
 

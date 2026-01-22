@@ -1,9 +1,17 @@
+"https://raw.githubusercontent.com/dioragao/Carticas/main/miColeccion.json?ts=" +
+  Date.now();
+
 document.addEventListener("DOMContentLoaded", ()=>{
+	
   const loginOverlay=document.getElementById("loginOverlay");
   const mainContent=document.getElementById("mainContent");
   const loginBtn=document.getElementById("loginBtn");
   const loginPassword=document.getElementById("loginPassword");
   const loginError=document.getElementById("loginError");
+  const GITHUB_JSON_URL =
+  "https://raw.githubusercontent.com/dioragao/Carticas/main/miColeccion.json?ts=" +
+  Date.now();
+
   const PASSWORD="mmmmm";
 
   loginBtn.addEventListener("click", ()=>{ 
@@ -33,20 +41,33 @@ document.addEventListener("DOMContentLoaded", ()=>{
     const exportBtn=document.getElementById("exportBtn");
     const importBtn=document.getElementById("importBtn");
 
-    let owned=JSON.parse(localStorage.getItem("ownedCards")||"{}");
+    let owned = JSON.parse(localStorage.getItem("ownedCards") || "{}");
+
+if (Object.keys(owned).length === 0) {
+  cargarColeccionGitHub().then(() => {
+    mostrarCartasFiltradas(); // o tu función que dibuja cartas
+  });
+}
+
     let todasCartas=[], ordenAscendente=true, tierraSeleccionada=selectorTierra.value;
     let pestañaActiva="tierra", marcadoBloqueado=false, modoBorrar=false;
     let cartasMostradas=0, LOTE=30;
 
     // --- Sincronización GitHub ---
-    async function cargarColeccionGitHub(){
-      try {
-        const res=await fetch("https://raw.githubusercontent.com/dioragao/Carticas/main/miColeccion.json");
-        const data=await res.json();
-        owned=data;
-        localStorage.setItem("ownedCards", JSON.stringify(owned));
-      } catch(e){ console.log("No se pudo cargar colección desde GitHub"); }
-    }
+   async function cargarColeccionGitHub() {
+  try {
+    const res = await fetch(GITHUB_JSON_URL);
+    if (!res.ok) throw new Error("Error al descargar JSON");
+
+    const data = await res.json();
+    owned = data;
+
+    localStorage.setItem("ownedCards", JSON.stringify(owned));
+  } catch (e) {
+    console.log("No se pudo cargar la colección desde GitHub");
+  }
+}
+
 
     function exportarColeccion(){
       const dataStr=JSON.stringify(owned,null,2);
@@ -226,6 +247,21 @@ document.addEventListener("DOMContentLoaded", ()=>{
       document.getElementById("urlImagen").value="";
       document.getElementById("fileImagen").value="";
       document.getElementById("esFoil").checked=false;
+document
+  .getElementById("syncGithubBtn")
+  .addEventListener("click", sincronizarDesdeGitHub);
     });
   }
 });
+function sincronizarDesdeGitHub() {
+  const confirmar = confirm(
+    "Esto sobrescribirá la colección guardada en este dispositivo.\n\n" +
+    "Se cargará la colección desde GitHub.\n\n¿Deseas continuar?"
+  );
+
+  if (!confirmar) return;
+
+  localStorage.removeItem("coleccion");
+  location.reload();
+}
+

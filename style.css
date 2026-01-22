@@ -149,3 +149,15 @@ button, input[type=checkbox], select {
   .top-controls { gap: 3px; font-size: 12px; }
   #contador { font-size: 14px; }
 }
+#syncGithubBtn {
+  background-color: #2ea44f;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#syncGithubBtn:hover {
+  background-color: #24963e;
+}
